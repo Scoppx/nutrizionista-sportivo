@@ -69,3 +69,28 @@ p { max-width: 62ch; }
 @media (min-width: 900px) {
   .hero-grid { grid-template-columns: 1.1fr .9fr; }
 }
+
+.sezione { padding: clamp(3rem, 9vw, 6rem) 0; }
+.sezione > h2 { margin-bottom: 2rem; }
+
+.cards { display: grid; gap: 1.25rem; }
+.card { background: var(--bg-alt); border: 1px solid var(--line); border-radius: 14px; padding: 1.5rem; }
+.card h3 { margin-bottom: .5rem; }
+.card p { color: var(--ink-soft); }
+.prezzo { margin-top: 1rem; font-weight: 700; color: var(--ink); }
+
+.due-colonne { display: grid; gap: var(--gap); align-items: center; }
+.due-colonne img { border-radius: 16px; }
+.credenziali { margin: 1.25rem 0; padding-left: 1.1rem; color: var(--ink-soft); }
+
+.faq details { border-bottom: 1px solid var(--line); padding: 1rem 0; }
+.faq summary { cursor: pointer; font-weight: 700; }
+.faq p { margin-top: .6rem; color: var(--ink-soft); }
+
+.contatti address { font-style: normal; color: var(--ink-soft); margin: 1.5rem 0; }
+.contatti img { border-radius: 14px; }
+
+@media (min-width: 900px) {
+  .cards { grid-template-columns: repeat(3, 1fr); }
+  .due-colonne { grid-template-columns: .9fr 1.1fr; }
+}
