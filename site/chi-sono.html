@@ -23,7 +23,13 @@
   </header>
   <main id="contenuto">
     <section class="sezione wrap due-colonne">
-      <div class="rv"><img src="/assets/img/ritratto-2.jpg" alt="Ritratto del nutrizionista" width="900" height="1100" fetchpriority="high" data-placeholder></div>
+      <div class="rv">
+        <picture>
+          <source type="image/webp" srcset="/assets/img/ritratto-2.webp 900w, /assets/img/ritratto-2@2x.webp 1800w" sizes="(min-width: 900px) 45vw, 100vw">
+          <img src="/assets/img/ritratto-2.jpg" srcset="/assets/img/ritratto-2.jpg 900w, /assets/img/ritratto-2@2x.jpg 1800w" sizes="(min-width: 900px) 45vw, 100vw"
+               alt="Ritratto del nutrizionista" width="900" height="1100" fetchpriority="high" data-placeholder>
+        </picture>
+      </div>
       <div class="rv" data-placeholder>
         <h1>Chi sono</h1>
         <p>Biologo nutrizionista e personal trainer. Ho iniziato allenandomi, poi ho studiato quello che stavo già facendo con il corpo.</p>
