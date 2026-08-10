@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { PAGES } from './pages.js';
 
 test('la hero offre WhatsApp ed email', async ({ page }) => {
   await page.goto('/');
@@ -13,9 +14,11 @@ test('la hero offre WhatsApp ed email', async ({ page }) => {
   await expect(mail).toHaveCount(1);
 });
 
-test('i link esterni non aprono falle di sicurezza', async ({ page }) => {
-  await page.goto('/');
-  for (const a of await page.locator('a[target="_blank"]').all()) {
-    await expect(a).toHaveAttribute('rel', /noopener/);
-  }
-});
+for (const path of PAGES) {
+  test(`i link esterni non aprono falle di sicurezza su ${path}`, async ({ page }) => {
+    await page.goto(path);
+    for (const a of await page.locator('a[target="_blank"]').all()) {
+      await expect(a).toHaveAttribute('rel', /noopener/);
+    }
+  });
+}

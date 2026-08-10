@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { PAGES } from './pages.js';
 
 test('la home si carica ed è dichiarata in italiano', async ({ page }) => {
   await page.goto('/');
@@ -14,13 +15,15 @@ test('la home contiene tutte le sezioni previste', async ({ page }) => {
   }
 });
 
-test('nessuna testimonianza e nessuna promessa di risultato', async ({ page }) => {
-  await page.goto('/');
-  const testo = (await page.locator('body').textContent()).toLowerCase();
-  for (const vietato of ['testimonianz', 'garantit', 'prima e dopo', 'in soli', 'risultati garantiti']) {
-    expect(testo, `il testo contiene "${vietato}": vietato dalla Legge 145/2018`).not.toContain(vietato);
-  }
-});
+for (const path of PAGES) {
+  test(`nessuna testimonianza e nessuna promessa di risultato su ${path}`, async ({ page }) => {
+    await page.goto(path);
+    const testo = (await page.locator('body').textContent()).toLowerCase();
+    for (const vietato of ['testimonianz', 'garantit', 'prima e dopo', 'in soli', 'risultati garantiti']) {
+      expect(testo, `il testo contiene "${vietato}": vietato dalla Legge 145/2018`).not.toContain(vietato);
+    }
+  });
+}
 
 const META = [
   { path: '/percorsi.html', h1: /percorsi/i, titolo: /percorsi/i },
@@ -37,3 +40,23 @@ for (const p of META) {
     await expect(page.locator('nav a[aria-current="page"]')).toHaveCount(1);
   });
 }
+
+test('percorsi.html elenca tre percorsi, ciascuno con un prezzo', async ({ page }) => {
+  await page.goto('/percorsi.html');
+  const percorsi = page.locator('article.percorso');
+  await expect(percorsi).toHaveCount(3);
+  for (const articolo of await percorsi.all()) {
+    await expect(articolo.locator('.prezzo')).toHaveText(/\d+\s?€/);
+  }
+});
+
+test('chi-sono.html elenca le credenziali', async ({ page }) => {
+  await page.goto('/chi-sono.html');
+  const voci = page.locator('.credenziali li');
+  await expect(voci).toHaveCount(4);
+  for (const voce of await voci.all()) {
+    const testo = await voce.textContent();
+    expect(testo.trim().length, 'una voce di credenziali è vuota').toBeGreaterThan(0);
+  }
+  await expect(page.locator('.credenziali')).toContainText('Ordine Nazionale dei Biologi');
+});
