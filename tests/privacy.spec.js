@@ -18,8 +18,7 @@ test.describe('conformità di base', () => {
       const footer = page.locator('footer.site-footer');
       await expect(footer).toContainText(/P\.?\s?IVA/i);
       await expect(footer).toContainText(/ONB n\./i);
-      // 2: uno nel footer-nav (Task 9), uno nel blocco legale storico
-      await expect(footer.locator('a[href$="privacy.html"]')).toHaveCount(2);
+      await expect(footer.locator('a[href$="privacy.html"]')).toHaveCount(1);
     });
 
     test(`i font sono serviti dal nostro dominio su ${path}`, async ({ page }) => {
