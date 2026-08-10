@@ -47,3 +47,29 @@ test.describe('senza JavaScript', () => {
     }
   });
 });
+
+test.describe('sezione sticky del metodo', () => {
+  test('l\'immagine cambia in base allo scroll', async ({ page }) => {
+    await page.goto('/');
+    const sezione = page.locator('#metodo');
+    const immagini = page.locator('#metodo .metodo-img');
+    await expect(immagini).toHaveCount(3);
+
+    const vaiA = async (frazione) => {
+      await sezione.evaluate((el, f) => {
+        const inizio = el.offsetTop;
+        const percorso = el.offsetHeight - window.innerHeight;
+        window.scrollTo(0, inizio + percorso * f);
+      }, frazione);
+      await page.waitForTimeout(250);
+    };
+
+    await vaiA(0.05);
+    await expect(immagini.nth(0)).toHaveClass(/\bon\b/);
+    await vaiA(0.5);
+    await expect(immagini.nth(1)).toHaveClass(/\bon\b/);
+    await expect(page.locator('#metodo .metodo-cap')).toContainText('02');
+    await vaiA(0.95);
+    await expect(immagini.nth(2)).toHaveClass(/\bon\b/);
+  });
+});

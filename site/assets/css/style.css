@@ -106,3 +106,29 @@ p { max-width: 62ch; }
 @media (prefers-reduced-motion: reduce) {
   .js .rv, .js .rv.in { opacity: 1; transform: none; transition: none; }
 }
+
+.metodo { background: var(--ink); color: #fff; }
+.metodo-track { display: none; }
+.js .metodo-track { display: block; height: 300vh; position: relative; }
+.js .metodo-fallback { display: none; }
+
+.metodo-fallback { list-style: none; padding: 3rem 0; display: grid; gap: 2rem; }
+.metodo-fallback h3 { color: var(--accent); }
+
+.metodo-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+.metodo-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .4s linear; }
+.metodo-img.on { opacity: 1; }
+
+.metodo-cap { position: absolute; inset: auto 0 0 0; padding: clamp(1.5rem, 5vw, 3.5rem); background: linear-gradient(transparent, rgba(0,0,0,.85)); }
+.metodo-label { font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.metodo-titolo { margin: .5rem 0; }
+.metodo-testo { color: rgba(255,255,255,.85); }
+
+.metodo-dots { position: absolute; right: 1.25rem; top: 50%; translate: 0 -50%; list-style: none; padding: 0; display: grid; gap: .5rem; }
+.metodo-dots li { width: 6px; height: 6px; border-radius: 99px; background: rgba(255,255,255,.35); transition: height .3s; }
+.metodo-dots li.on { background: #fff; height: 20px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js .metodo-track { display: none; }
+  .js .metodo-fallback { display: grid; }
+}
