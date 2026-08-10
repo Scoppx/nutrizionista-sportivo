@@ -135,3 +135,7 @@ p { max-width: 62ch; }
   .js .metodo-track { display: none; }
   .js .metodo-fallback { display: grid; }
 }
+
+.percorso { border-top: 1px solid var(--line); padding: 2rem 0; }
+.percorso p { color: var(--ink-soft); margin-top: .5rem; }
+.percorso strong { color: var(--ink); }
