@@ -828,6 +828,7 @@ Expected: FAIL — nessun elemento `.rv` nel documento.
   const root = document.documentElement;
   const ridotto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (ridotto) return;              // niente classe js: il CSS non nasconde nulla
+  if (!('IntersectionObserver' in window)) return;  // senza observer non riveleremmo piu nulla
 
   root.classList.add('js');
 
