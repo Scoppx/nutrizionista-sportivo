@@ -37,7 +37,7 @@ Valgono per ogni task. Ogni task li eredita implicitamente.
 - **Footer di ogni pagina:** partita IVA, numero di iscrizione all'albo, link a `privacy.html`. Obbligo di legge, non elemento di design.
 - **Nessuna testimonianza, nessuna promessa di risultato, nessuna foto prima/dopo, nessuno sconto a tempo.** Legge 145/2018 sulla pubblicità sanitaria.
 - **Budget prestazioni:** home sotto 800 KB trasferiti in totale.
-- **Contenuti segnaposto:** ogni testo o dato non fornito dal cliente porta l'attributo `data-placeholder` sull'elemento che lo contiene. È il meccanismo che impedisce di andare online con la partita IVA inventata.
+- **Contenuti segnaposto:** ogni testo o dato non fornito dal cliente porta l'attributo `data-placeholder` sull'elemento che lo contiene. È il meccanismo che impedisce di andare online con la partita IVA inventata. Vale anche per gli elementi non visibili: `<title data-placeholder>` è HTML valido e il censimento lo trova, mentre un titolo di pagina con il nome inventato passerebbe altrimenti inosservato.
 
 ### Dati segnaposto standard (usare sempre questi, mai inventarne altri)
 
@@ -1205,8 +1205,11 @@ test('nessun contenuto segnaposto resta prima della pubblicazione', async ({ pag
   for (const path of PAGES) {
     await page.goto(path);
     for (const el of await page.locator('[data-placeholder]').all()) {
-      const testo = (await el.innerText()).replace(/\s+/g, ' ').trim().slice(0, 60);
-      rimasti.push(`${path} → ${testo}`);
+      // textContent, non innerText: gli elementi non renderizzati come <title>
+      // devono comparire nell'elenco, altrimenti sfuggono al controllo
+      const testo = ((await el.textContent()) || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+      const tag = await el.evaluate((n) => n.tagName.toLowerCase());
+      rimasti.push(`${path} → <${tag}> ${testo}`);
     }
   }
   expect(rimasti, 'dati inventati ancora presenti, non pubblicare').toEqual([]);
