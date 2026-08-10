@@ -22,3 +22,11 @@ test.describe('conformità di base', () => {
     });
   }
 });
+
+test('i font sono serviti dal nostro dominio', async ({ page }) => {
+  const font = [];
+  page.on('request', (req) => { if (req.resourceType() === 'font') font.push(req.url()); });
+  await page.goto('/', { waitUntil: 'networkidle' });
+  expect(font.length, 'nessun font caricato: Inter non è agganciato').toBeGreaterThan(0);
+  for (const u of font) expect(new URL(u).hostname).toBe('localhost');
+});
