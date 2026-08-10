@@ -390,20 +390,22 @@ git commit -m "feat: header, footer legale e scheletro delle quattro pagine"
 
 **Interfaces:**
 - Consumes: `PAGES` da `tests/privacy.spec.js`.
-- Produces: `site/assets/fonts/inter-400.woff2` e `inter-700.woff2`; famiglia CSS `Inter` disponibile ovunque.
+- Produces: `site/assets/fonts/inter-variable.woff2` (un solo file variabile, pesi 100-900); famiglia CSS `Inter` disponibile ovunque.
 
 - [ ] **Step 1: Scrivere il test che fallisce**
 
 Aggiungere in coda a `tests/privacy.spec.js`:
 
 ```js
-test('i font sono serviti dal nostro dominio', async ({ page }) => {
-  const font = [];
-  page.on('request', (req) => { if (req.resourceType() === 'font') font.push(req.url()); });
-  await page.goto('/', { waitUntil: 'networkidle' });
-  expect(font.length, 'nessun font caricato: Inter non è agganciato').toBeGreaterThan(0);
-  for (const u of font) expect(new URL(u).hostname).toBe('localhost');
-});
+for (const path of PAGES) {
+  test(`i font di ${path} sono serviti dal nostro dominio`, async ({ page }) => {
+    const font = [];
+    page.on('request', (req) => { if (req.resourceType() === 'font') font.push(req.url()); });
+    await page.goto(path, { waitUntil: 'networkidle' });
+    expect(font.length, 'nessun font caricato: Inter non è agganciato').toBeGreaterThan(0);
+    for (const u of font) expect(new URL(u).hostname).toBe('localhost');
+  });
+}
 ```
 
 - [ ] **Step 2: Eseguire e verificare il fallimento**
