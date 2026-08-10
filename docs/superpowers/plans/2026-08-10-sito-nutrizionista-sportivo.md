@@ -1356,9 +1356,13 @@ import { test, expect } from '@playwright/test';
 
 test('la home resta sotto gli 800 KB', async ({ page }) => {
   await page.goto('/', { waitUntil: 'networkidle' });
-  const byte = await page.evaluate(() =>
-    performance.getEntriesByType('resource').reduce((t, r) => t + (r.transferSize || 0), 0)
-  );
+  const byte = await page.evaluate(() => {
+    // il documento HTML sta nella entry 'navigation', non in 'resource':
+    // sommando solo le risorse il budget non vedrebbe mai una pagina gonfia
+    const doc = performance.getEntriesByType('navigation')[0]?.transferSize || 0;
+    return performance.getEntriesByType('resource')
+      .reduce((t, r) => t + (r.transferSize || 0), doc);
+  });
   const kb = Math.round(byte / 1024);
   console.log(`peso della home: ${kb} KB`);
   expect(kb).toBeLessThan(800);
