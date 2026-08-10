@@ -4,8 +4,6 @@
   if (ridotto) return;              // niente classe js: il CSS non nasconde nulla
   if (!('IntersectionObserver' in window)) return;  // senza observer non riveleremmo piu nulla
 
-  root.classList.add('js');
-
   const osservatore = new IntersectionObserver((voci) => {
     for (const voce of voci) {
       if (!voce.isIntersecting) continue;
@@ -14,9 +12,36 @@
     }
   }, { threshold: 0.2 });
 
-  document.querySelectorAll('.rv').forEach((el, i) => {
+  const elenco = [...document.querySelectorAll('.rv')];
+
+  // Misurare la posizione ORA, prima di aggiungere la classe 'js': senza di
+  // essa '.rv' non ha ancora la regola opacity:0, quindi questa lettura
+  // (che forza layout) non "fissa" nessuno stato intermedio da animare.
+  // Misurare dopo aver reso invisibile l'elemento costringerebbe il
+  // browser a registrare opacity:0 come stile osservato, e la classe 'in'
+  // aggiunta subito dopo farebbe comunque partire una transizione vera.
+  const giaVisibili = new Set(
+    elenco.filter((el) => {
+      const rect = el.getBoundingClientRect();
+      return rect.top < window.innerHeight && rect.bottom > 0;
+    })
+  );
+
+  root.classList.add('js');
+
+  elenco.forEach((el, i) => {
     el.style.setProperty('--rv-delay', `${(i % 4) * 80}ms`);
-    osservatore.observe(el);
+    if (giaVisibili.has(el)) {
+      // già dentro il viewport al caricamento: niente da "rivelare". La classe
+      // arriva nello stesso giro di sincrono di 'js', senza letture di layout
+      // in mezzo, cosi' il motore la applica prima del primo paint invece di
+      // animarla — altrimenti contenuto già visibile sfarfallerebbe da
+      // invisibile a visibile, e per una finestra di transizione il testo
+      // avrebbe contrasto sotto soglia.
+      el.classList.add('in');
+    } else {
+      osservatore.observe(el);
+    }
   });
 
   const sezione = document.querySelector('#metodo');

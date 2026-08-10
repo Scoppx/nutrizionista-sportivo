@@ -39,15 +39,20 @@ p { max-width: 62ch; }
 .skip { position: absolute; left: -9999px; }
 .skip:focus { left: 1rem; top: 1rem; background: var(--ink); color: #fff; padding: .6rem 1rem; z-index: 99; }
 
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.metodo :focus-visible { outline-color: #fff; }
+
 .site-header { border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); z-index: 50; }
 .site-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .9rem 0; }
 .logo { font-weight: 700; letter-spacing: .04em; text-decoration: none; color: var(--ink); }
 .site-header nav { display: flex; align-items: center; gap: 1.25rem; }
-.site-header nav a { color: var(--ink-soft); text-decoration: none; font-size: .95rem; }
-.site-header nav a:hover, .site-header nav a[aria-current="page"] { color: var(--ink); }
+.site-header nav a:not(.btn) { color: var(--ink-soft); text-decoration: none; font-size: .95rem; }
+.site-header nav a:not(.btn):hover, .site-header nav a:not(.btn)[aria-current="page"] { color: var(--ink); }
 
 .btn { display: inline-block; padding: .7rem 1.2rem; border-radius: 99px; font-weight: 700; text-decoration: none; }
-.btn-accent { background: var(--accent); color: #fff; }
+/* colore ink, non bianco: bianco su --accent rende un contrasto di 3,79:1,
+   sotto la soglia 4,5:1 richiesta da WCAG 2 AA per testo di questa dimensione */
+.btn-accent { background: var(--accent); color: var(--ink); }
 .btn-ink { background: var(--ink); color: #fff; }
 
 .site-footer { border-top: 1px solid var(--line); margin-top: 4rem; padding: 2.5rem 0; color: var(--ink-soft); font-size: .9rem; }
