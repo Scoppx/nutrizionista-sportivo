@@ -128,6 +128,9 @@ p { max-width: 62ch; }
 .metodo-dots li { width: 6px; height: 6px; border-radius: 99px; background: rgba(255,255,255,.35); transition: height .3s; }
 .metodo-dots li.on { background: #fff; height: 20px; }
 
+/* non e' codice morto: motion.js legge prefers-reduced-motion una sola volta al caricamento,
+   mentre questa media query resta viva — copre il caso in cui la preferenza cambi a pagina
+   gia' aperta (con .js gia' impostata) senza bisogno di un reload. */
 @media (prefers-reduced-motion: reduce) {
   .js .metodo-track { display: none; }
   .js .metodo-fallback { display: grid; }

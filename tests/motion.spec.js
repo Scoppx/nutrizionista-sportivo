@@ -72,4 +72,34 @@ test.describe('sezione sticky del metodo', () => {
     await vaiA(0.95);
     await expect(immagini.nth(2)).toHaveClass(/\bon\b/);
   });
+
+  test('i sottotitoli sticky combaciano parola per parola con l\'elenco di fallback', async ({ page }) => {
+    await page.goto('/');
+    const sezione = page.locator('#metodo');
+
+    const vaiA = async (frazione) => {
+      await sezione.evaluate((el, f) => {
+        const inizio = el.offsetTop;
+        const percorso = el.offsetHeight - window.innerHeight;
+        window.scrollTo(0, inizio + percorso * f);
+      }, frazione);
+      await page.waitForTimeout(250);
+    };
+
+    // testContent, non innerText: .metodo-fallback è display:none quando .js è attiva,
+    // e innerText di un elemento nascosto torna vuoto — il confronto passerebbe a vuoto.
+    const normalizza = (s) => s.replace(/\s+/g, ' ').trim();
+    const voci = page.locator('#metodo .metodo-fallback li');
+    const frazioni = [0.05, 0.5, 0.95];
+
+    for (let i = 0; i < frazioni.length; i++) {
+      await vaiA(frazioni[i]);
+      const titoloSticky = normalizza(await page.locator('#metodo .metodo-titolo').textContent());
+      const testoSticky = normalizza(await page.locator('#metodo .metodo-testo').textContent());
+      const titoloFallback = normalizza(await voci.nth(i).locator('h3').textContent());
+      const testoFallback = normalizza(await voci.nth(i).locator('p').textContent());
+      expect(titoloSticky, `passo ${i}: titolo`).toBe(titoloFallback);
+      expect(testoSticky, `passo ${i}: testo`).toBe(testoFallback);
+    }
+  });
 });
