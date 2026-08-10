@@ -262,7 +262,7 @@ git commit -m "chore: impianto progetto, server di test e smoke test"
 importarlo da un altro file di test registrerebbe due volte gli stessi test e Playwright darebbe errore.
 
 ```js
-export const PAGES = ['/', '/percorsi.html', '/chi-sono.html', '/privacy.html'];
+export const PAGES = ['/', '/percorsi.html', '/chi-sono.html', '/privacy.html', '/404.html'];
 ```
 
 `tests/privacy.spec.js`:
@@ -326,7 +326,6 @@ Blocco footer, prima di `</body>` in ogni pagina:
     <p data-placeholder><strong>Dott. Marco Rossi</strong> — Biologo nutrizionista · Personal trainer</p>
     <p data-placeholder>P. IVA 01234567890 · Iscrizione ONB n. AA_1234</p>
     <p data-placeholder>Via Esempio 1, Milano</p>
-    <p><a href="/privacy.html">Privacy</a></p>
   </div>
 </footer>
 ```
