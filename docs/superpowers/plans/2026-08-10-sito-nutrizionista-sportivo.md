@@ -508,8 +508,9 @@ test('la hero offre WhatsApp ed email', async ({ page }) => {
   await expect(mail).toHaveCount(1);
 });
 
-test('i link esterni non aprono falle di sicurezza', async ({ page }) => {
-  await page.goto('/');
+for (const path of PAGES) {
+ test(`i link esterni di ${path} non aprono falle di sicurezza`, async ({ page }) => {
+  await page.goto(path);
   for (const a of await page.locator('a[target="_blank"]').all()) {
     await expect(a).toHaveAttribute('rel', /noopener/);
   }
@@ -606,8 +607,9 @@ test('la home contiene tutte le sezioni previste', async ({ page }) => {
   }
 });
 
-test('nessuna testimonianza e nessuna promessa di risultato', async ({ page }) => {
-  await page.goto('/');
+for (const path of PAGES) {
+ test(`nessuna testimonianza ne promessa di risultato su ${path}`, async ({ page }) => {
+  await page.goto(path);
   // textContent, non innerText: le risposte delle FAQ stanno dentro <details>
   // chiusi e innerText non le vede, quindi una frase vietata passerebbe
   const testo = ((await page.locator('body').textContent()) || '').toLowerCase();
@@ -1161,7 +1163,7 @@ Expected: FAIL — manca la `description` e manca `aria-current`.
       </ul>
       <h2>In gara</h2>
       <p>Categoria e risultati da inserire con i dati reali.</p>
-      <a class="btn btn-accent" href="https://wa.me/393330000000" target="_blank" rel="noopener">Scrivimi su WhatsApp</a>
+      <a class="btn btn-accent" href="https://wa.me/393330000000" target="_blank" rel="noopener" data-placeholder>Scrivimi su WhatsApp</a>
     </div>
   </section>
 </main>
