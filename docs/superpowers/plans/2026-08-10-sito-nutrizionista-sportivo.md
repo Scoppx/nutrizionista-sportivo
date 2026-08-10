@@ -375,7 +375,7 @@ Expected: PASS su tutte le combinazioni pagina/progetto; html-validate senza err
 - [ ] **Step 6: Commit**
 
 ```bash
-git add site tests/privacy.spec.js
+git add site tests/pages.js tests/privacy.spec.js
 git commit -m "feat: header, footer legale e scheletro delle quattro pagine"
 ```
 
