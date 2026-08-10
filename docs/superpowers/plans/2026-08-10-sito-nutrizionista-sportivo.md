@@ -956,7 +956,7 @@ dello spec §4: hero, per chi è, metodo, chi sono, percorsi, chi seguo, FAQ, co
     </div>
   </div>
   <ol class="metodo-fallback wrap">
-    <li><h3>01 · Valutazione</h3><p>Composizione corporea, allenamento, orari, abitudini.</p></li>
+    <li><h3>01 · Valutazione</h3><p>Composizione corporea, allenamento, orari, abitudini. Prima di scrivere qualsiasi cosa.</p></li>
     <li><h3>02 · Piano</h3><p>Calorie e distribuzione costruite intorno ai tuoi allenamenti.</p></li>
     <li><h3>03 · Controlli</h3><p>Aggiustamenti ogni tre o quattro settimane, con i numeri alla mano.</p></li>
   </ol>
@@ -965,6 +965,10 @@ dello spec §4: hero, per chi è, metodo, chi sono, percorsi, chi seguo, FAQ, co
 
 `.metodo-fallback` è la stessa informazione in forma di elenco: è ciò che vede chi non ha
 JavaScript e ciò che legge un motore di ricerca. Con JavaScript attivo viene nascosto.
+
+I tre testi esistono due volte: nell'array `passi` di `motion.js` e qui. Un test di parità confronta
+le due copie parola per parola — senza, la prima modifica al testo le fa divergere in silenzio e chi
+non ha JavaScript legge meno di chi ce l'ha.
 
 - [ ] **Step 4: Scrivere il CSS**
 
