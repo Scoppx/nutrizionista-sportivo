@@ -57,3 +57,15 @@ p { max-width: 62ch; }
 @media (max-width: 900px) {
   .site-header nav a:not(.btn) { display: none; }
 }
+
+.hero { padding: clamp(2.5rem, 8vw, 5.5rem) 0; }
+.hero-grid { display: grid; gap: var(--gap); align-items: center; }
+.eyebrow { font-size: .82rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 1rem; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.lead { font-size: 1.15rem; color: var(--ink-soft); margin-top: 1.25rem; }
+.hero-cta { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2rem; }
+.hero-media img { width: 100%; height: auto; border-radius: 16px; object-fit: cover; }
+
+@media (min-width: 900px) {
+  .hero-grid { grid-template-columns: 1.1fr .9fr; }
+}
