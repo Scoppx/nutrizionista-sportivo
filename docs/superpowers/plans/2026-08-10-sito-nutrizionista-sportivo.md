@@ -578,325 +578,19 @@ git commit -m "feat: hero con contatto WhatsApp ed email"
 
 ---
 
-### Task 5: Reveal allo scroll
-
-**Files:**
-- Create: `site/assets/js/motion.js`, `tests/motion.spec.js`
-- Modify: `site/index.html` (e le altre tre pagine), `site/assets/css/style.css`
-
-**Interfaces:**
-- Consumes: `.hero` dal Task 4.
-- Produces: classe `.rv` (elemento da rivelare), `.rv.in` (rivelato), classe `js` su `<html>`, variabile CSS `--rv-delay` per lo stagger. Le sezioni dei task successivi useranno `.rv` senza dover toccare `motion.js`.
-
-- [ ] **Step 1: Scrivere i test che falliscono**
-
-`tests/motion.spec.js`:
-
-```js
-import { test, expect } from '@playwright/test';
-
-const opacita = (loc) => loc.evaluate((el) => Number(getComputedStyle(el).opacity));
-
-test.describe('reveal', () => {
-  test('un elemento sotto la piega è nascosto e compare scrollando', async ({ page }) => {
-    await page.goto('/');
-    const target = page.locator('.rv').last();
-    expect(await opacita(target)).toBeLessThan(0.1);
-
-    await target.scrollIntoViewIfNeeded();
-    await expect(target).toHaveClass(/\bin\b/);
-    await expect.poll(() => opacita(target)).toBeGreaterThan(0.95);
-  });
-
-  test('il reveal non si ripete tornando indietro', async ({ page }) => {
-    await page.goto('/');
-    const target = page.locator('.rv').last();
-    await target.scrollIntoViewIfNeeded();
-    await expect(target).toHaveClass(/\bin\b/);
-    await page.evaluate(() => window.scrollTo(0, 0));
-    await page.waitForTimeout(300);
-    await expect(target).toHaveClass(/\bin\b/);
-  });
-});
-
-test.describe('accessibilità del movimento', () => {
-  test.use({ reducedMotion: 'reduce' });
-  test('con reduced motion tutto è visibile subito', async ({ page }) => {
-    await page.goto('/');
-    for (const el of await page.locator('.rv').all()) {
-      expect(await opacita(el)).toBe(1);
-      expect(await el.evaluate((n) => getComputedStyle(n).transform)).toBe('none');
-    }
-  });
-});
-
-test.describe('senza JavaScript', () => {
-  test.use({ javaScriptEnabled: false });
-  test('il contenuto resta leggibile', async ({ page }) => {
-    await page.goto('/');
-    for (const el of await page.locator('.rv').all()) {
-      expect(await opacita(el)).toBe(1);
-    }
-  });
-});
-```
-
-- [ ] **Step 2: Eseguire e verificare il fallimento**
-
-Run: `npm test -- tests/motion.spec.js`
-Expected: FAIL — nessun elemento `.rv` nel documento.
-
-- [ ] **Step 3: Scrivere `motion.js`**
-
-`site/assets/js/motion.js`:
-
-```js
-(() => {
-  const root = document.documentElement;
-  const ridotto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (ridotto) return;              // niente classe js: il CSS non nasconde nulla
-
-  root.classList.add('js');
-
-  const osservatore = new IntersectionObserver((voci) => {
-    for (const voce of voci) {
-      if (!voce.isIntersecting) continue;
-      voce.target.classList.add('in');
-      osservatore.unobserve(voce.target);   // una volta sola
-    }
-  }, { threshold: 0.2 });
-
-  document.querySelectorAll('.rv').forEach((el, i) => {
-    el.style.setProperty('--rv-delay', `${(i % 4) * 80}ms`);
-    osservatore.observe(el);
-  });
-})();
-```
-
-Lo stagger riparte ogni quattro elementi: in un gruppo lungo un ritardo crescente all'infinito
-lascerebbe l'ultima card ferma per secondi.
-
-- [ ] **Step 4: Agganciare CSS e script**
-
-```css
-.js .rv { opacity: 0; transform: translateY(24px); }
-.js .rv.in {
-  opacity: 1;
-  transform: none;
-  transition: opacity .6s ease var(--rv-delay, 0ms),
-              transform .6s cubic-bezier(.2,.7,.2,1) var(--rv-delay, 0ms);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .js .rv, .js .rv.in { opacity: 1; transform: none; transition: none; }
-}
-```
-
-Prima di `</body>` in tutte e quattro le pagine:
-
-```html
-<script src="/assets/js/motion.js" defer></script>
-```
-
-Aggiungere `class="rv"` a `.hero-text` e `.hero-media`, e — per far esistere un elemento sotto la
-piega su cui i test possano lavorare — una sezione provvisoria in fondo a `main`:
-
-```html
-<section class="wrap rv" id="prova-reveal"><p>Sezione temporanea, sostituita nel Task 7.</p></section>
-```
-
-- [ ] **Step 5: Eseguire i test**
-
-Run: `npm test -- tests/motion.spec.js`
-Expected: PASS su tutti e tre i gruppi (reveal, reduced motion, senza JavaScript).
-
-- [ ] **Step 6: Commit**
-
-```bash
-git add site tests/motion.spec.js
-git commit -m "feat: reveal allo scroll con fallback reduced-motion e no-JS"
-```
-
----
-
-### Task 6: Sezione sticky del metodo
-
-**Files:**
-- Modify: `site/index.html`, `site/assets/css/style.css`, `site/assets/js/motion.js`, `tests/motion.spec.js`
-
-**Interfaces:**
-- Consumes: la struttura di `motion.js` dal Task 5.
-- Produces: `section#metodo` con `.metodo-track`, `.metodo-stage`, tre `.metodo-img` di cui una con classe `on`, `.metodo-cap`, `.metodo-dots`.
-
-- [ ] **Step 1: Scrivere il test che fallisce**
-
-Aggiungere a `tests/motion.spec.js`:
-
-```js
-test.describe('sezione sticky del metodo', () => {
-  test('l\'immagine cambia in base allo scroll', async ({ page }) => {
-    await page.goto('/');
-    const sezione = page.locator('#metodo');
-    const immagini = page.locator('#metodo .metodo-img');
-    await expect(immagini).toHaveCount(3);
-
-    const vaiA = async (frazione) => {
-      await sezione.evaluate((el, f) => {
-        const inizio = el.offsetTop;
-        const percorso = el.offsetHeight - window.innerHeight;
-        window.scrollTo(0, inizio + percorso * f);
-      }, frazione);
-      await page.waitForTimeout(250);
-    };
-
-    await vaiA(0.05);
-    await expect(immagini.nth(0)).toHaveClass(/\bon\b/);
-    await vaiA(0.5);
-    await expect(immagini.nth(1)).toHaveClass(/\bon\b/);
-    await expect(page.locator('#metodo .metodo-cap')).toContainText('02');
-    await vaiA(0.95);
-    await expect(immagini.nth(2)).toHaveClass(/\bon\b/);
-  });
-});
-```
-
-- [ ] **Step 2: Eseguire e verificare il fallimento**
-
-Run: `npm test -- tests/motion.spec.js -g "metodo"`
-Expected: FAIL — `#metodo` non esiste.
-
-- [ ] **Step 3: Scrivere il markup**
-
-In `index.html`, dopo la hero:
-
-```html
-<section id="metodo" class="metodo">
-  <div class="metodo-track">
-    <div class="metodo-stage">
-      <img class="metodo-img on" src="/assets/img/metodo-1.jpg" alt="Valutazione della composizione corporea" width="1200" height="900" loading="lazy" data-placeholder>
-      <img class="metodo-img" src="/assets/img/metodo-2.jpg" alt="Costruzione del piano alimentare" width="1200" height="900" loading="lazy" data-placeholder>
-      <img class="metodo-img" src="/assets/img/metodo-3.jpg" alt="Controllo dei progressi" width="1200" height="900" loading="lazy" data-placeholder>
-      <ol class="metodo-dots" aria-hidden="true"><li class="on"></li><li></li><li></li></ol>
-      <div class="metodo-cap">
-        <p class="metodo-label">Il metodo</p>
-        <h2 class="metodo-titolo">01 · Valutazione</h2>
-        <p class="metodo-testo">Composizione corporea, allenamento, orari, abitudini. Prima di scrivere qualsiasi cosa.</p>
-      </div>
-    </div>
-  </div>
-  <ol class="metodo-fallback wrap">
-    <li><h3>01 · Valutazione</h3><p>Composizione corporea, allenamento, orari, abitudini.</p></li>
-    <li><h3>02 · Piano</h3><p>Calorie e distribuzione costruite intorno ai tuoi allenamenti.</p></li>
-    <li><h3>03 · Controlli</h3><p>Aggiustamenti ogni tre o quattro settimane, con i numeri alla mano.</p></li>
-  </ol>
-</section>
-```
-
-`.metodo-fallback` è la stessa informazione in forma di elenco: è ciò che vede chi non ha
-JavaScript e ciò che legge un motore di ricerca. Con JavaScript attivo viene nascosto.
-
-- [ ] **Step 4: Scrivere il CSS**
-
-```css
-.metodo { background: var(--ink); color: #fff; }
-.metodo-track { display: none; }
-.js .metodo-track { display: block; height: 300vh; position: relative; }
-.js .metodo-fallback { display: none; }
-
-.metodo-fallback { list-style: none; padding: 3rem 0; display: grid; gap: 2rem; }
-.metodo-fallback h3 { color: var(--accent); }
-
-.metodo-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
-.metodo-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .4s linear; }
-.metodo-img.on { opacity: 1; }
-
-.metodo-cap { position: absolute; inset: auto 0 0 0; padding: clamp(1.5rem, 5vw, 3.5rem); background: linear-gradient(transparent, rgba(0,0,0,.85)); }
-.metodo-label { font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
-.metodo-titolo { margin: .5rem 0; }
-.metodo-testo { color: rgba(255,255,255,.85); }
-
-.metodo-dots { position: absolute; right: 1.25rem; top: 50%; translate: 0 -50%; list-style: none; padding: 0; display: grid; gap: .5rem; }
-.metodo-dots li { width: 6px; height: 6px; border-radius: 99px; background: rgba(255,255,255,.35); transition: height .3s; }
-.metodo-dots li.on { background: #fff; height: 20px; }
-
-@media (prefers-reduced-motion: reduce) {
-  .js .metodo-track { display: none; }
-  .js .metodo-fallback { display: grid; }
-}
-```
-
-Con `prefers-reduced-motion` la sezione sticky sparisce del tutto e resta l'elenco: è la soluzione
-onesta, un'animazione "attenuata" alta tre schermate resta comunque disorientante.
-
-- [ ] **Step 5: Aggiungere lo scrub a `motion.js`**
-
-Prima della chiusura della funzione anonima:
-
-```js
-  const sezione = document.querySelector('#metodo');
-  if (sezione) {
-    const track = sezione.querySelector('.metodo-track');
-    const immagini = [...sezione.querySelectorAll('.metodo-img')];
-    const punti = [...sezione.querySelectorAll('.metodo-dots li')];
-    const titolo = sezione.querySelector('.metodo-titolo');
-    const testo = sezione.querySelector('.metodo-testo');
-    const passi = [
-      ['01 · Valutazione', 'Composizione corporea, allenamento, orari, abitudini. Prima di scrivere qualsiasi cosa.'],
-      ['02 · Piano', 'Calorie e distribuzione costruite intorno ai tuoi allenamenti.'],
-      ['03 · Controlli', 'Aggiustamenti ogni tre o quattro settimane, con i numeri alla mano.'],
-    ];
-
-    let attivo = -1;
-    let inCoda = false;
-
-    const aggiorna = () => {
-      inCoda = false;
-      const percorso = track.offsetHeight - window.innerHeight;
-      const fatto = (window.scrollY - track.offsetTop) / percorso;
-      const i = fatto < 0.34 ? 0 : fatto < 0.68 ? 1 : 2;
-      if (i === attivo) return;
-      attivo = i;
-      immagini.forEach((im, k) => im.classList.toggle('on', k === i));
-      punti.forEach((p, k) => p.classList.toggle('on', k === i));
-      titolo.textContent = passi[i][0];
-      testo.textContent = passi[i][1];
-    };
-
-    window.addEventListener('scroll', () => {
-      if (inCoda) return;
-      inCoda = true;
-      requestAnimationFrame(aggiorna);
-    }, { passive: true });
-    aggiorna();
-  }
-```
-
-`inCoda` accorpa gli eventi di scroll: senza, su un trackpad si eseguono decine di aggiornamenti per
-fotogramma.
-
-- [ ] **Step 6: Eseguire tutti i test di motion**
-
-Run: `npm test -- tests/motion.spec.js`
-Expected: PASS, compresi i test del Task 5 (nessuna regressione).
-
-- [ ] **Step 7: Commit**
-
-```bash
-git add site tests/motion.spec.js
-git commit -m "feat: sezione sticky del metodo con fallback a elenco"
-```
-
----
-
-### Task 7: Sezioni statiche della home
+### Task 5: Sezioni statiche della home
 
 **Files:**
 - Modify: `site/index.html`, `site/assets/css/style.css`
 - Test: `tests/smoke.spec.js`
 
 **Interfaces:**
-- Consumes: `.rv`, `.wrap`, `.btn` dai task precedenti.
+- Consumes: `.wrap`, `.btn`, `.hero-cta` dai Task 2 e 4.
 - Produces: ancore `#per-chi`, `#chi-sono`, `#percorsi`, `#faq`, `#contatti`; classi `.cards`, `.card`, `.faq`.
+
+Le classi `.rv` si scrivono già qui, sugli elementi che dovranno comparire allo scroll, ma restano
+inerti: il CSS e lo script che le attivano arrivano nel Task 6. Scriverle ora evita di ripassare su
+tutto il markup dopo.
 
 - [ ] **Step 1: Scrivere il test che fallisce**
 
@@ -905,10 +599,9 @@ Aggiungere a `tests/smoke.spec.js`:
 ```js
 test('la home contiene tutte le sezioni previste', async ({ page }) => {
   await page.goto('/');
-  for (const id of ['per-chi', 'metodo', 'chi-sono', 'percorsi', 'faq', 'contatti']) {
+  for (const id of ['per-chi', 'chi-sono', 'percorsi', 'chi-seguo', 'faq', 'contatti']) {
     await expect(page.locator(`#${id}`), `manca la sezione #${id}`).toHaveCount(1);
   }
-  await expect(page.locator('#prova-reveal')).toHaveCount(0);
 });
 
 test('nessuna testimonianza e nessuna promessa di risultato', async ({ page }) => {
@@ -923,11 +616,11 @@ test('nessuna testimonianza e nessuna promessa di risultato', async ({ page }) =
 - [ ] **Step 2: Eseguire e verificare il fallimento**
 
 Run: `npm test -- tests/smoke.spec.js`
-Expected: FAIL — mancano `#per-chi`, `#chi-sono`, `#percorsi`, `#faq`, `#contatti`.
+Expected: FAIL — mancano `#per-chi`, `#chi-sono`, `#percorsi`, `#chi-seguo`, `#faq`, `#contatti`.
 
 - [ ] **Step 3: Scrivere le sezioni**
 
-Rimuovere `#prova-reveal` e aggiungere, nell'ordine, dentro `main`:
+Aggiungere, nell'ordine, dentro `main`, dopo la hero:
 
 ```html
 <section id="per-chi" class="sezione wrap">
@@ -1050,6 +743,313 @@ Expected: PASS. Se il test sulle parole vietate fallisce, è il testo a dover ca
 ```bash
 git add site tests/smoke.spec.js
 git commit -m "feat: sezioni statiche della home"
+```
+
+---
+
+### Task 6: Reveal allo scroll
+
+**Files:**
+- Create: `site/assets/js/motion.js`, `tests/motion.spec.js`
+- Modify: `site/index.html` (e le altre tre pagine), `site/assets/css/style.css`
+
+**Interfaces:**
+- Consumes: la hero del Task 4 e le sezioni della home del Task 5 — servono elementi `.rv` reali sotto la piega su cui i test possano lavorare.
+- Produces: comportamento della classe `.rv` (elemento da rivelare), `.rv.in` (rivelato), classe `js` su `<html>`, variabile CSS `--rv-delay` per lo stagger. Le sezioni dei task successivi useranno `.rv` senza dover toccare `motion.js`.
+
+- [ ] **Step 1: Scrivere i test che falliscono**
+
+`tests/motion.spec.js`:
+
+```js
+import { test, expect } from '@playwright/test';
+
+const opacita = (loc) => loc.evaluate((el) => Number(getComputedStyle(el).opacity));
+
+test.describe('reveal', () => {
+  test('un elemento sotto la piega è nascosto e compare scrollando', async ({ page }) => {
+    await page.goto('/');
+    const target = page.locator('.rv').last();
+    expect(await opacita(target)).toBeLessThan(0.1);
+
+    await target.scrollIntoViewIfNeeded();
+    await expect(target).toHaveClass(/\bin\b/);
+    await expect.poll(() => opacita(target)).toBeGreaterThan(0.95);
+  });
+
+  test('il reveal non si ripete tornando indietro', async ({ page }) => {
+    await page.goto('/');
+    const target = page.locator('.rv').last();
+    await target.scrollIntoViewIfNeeded();
+    await expect(target).toHaveClass(/\bin\b/);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(300);
+    await expect(target).toHaveClass(/\bin\b/);
+  });
+});
+
+test.describe('accessibilità del movimento', () => {
+  test.use({ reducedMotion: 'reduce' });
+  test('con reduced motion tutto è visibile subito', async ({ page }) => {
+    await page.goto('/');
+    for (const el of await page.locator('.rv').all()) {
+      expect(await opacita(el)).toBe(1);
+      expect(await el.evaluate((n) => getComputedStyle(n).transform)).toBe('none');
+    }
+  });
+});
+
+test.describe('senza JavaScript', () => {
+  test.use({ javaScriptEnabled: false });
+  test('il contenuto resta leggibile', async ({ page }) => {
+    await page.goto('/');
+    for (const el of await page.locator('.rv').all()) {
+      expect(await opacita(el)).toBe(1);
+    }
+  });
+});
+```
+
+- [ ] **Step 2: Eseguire e verificare il fallimento**
+
+Run: `npm test -- tests/motion.spec.js`
+Expected: FAIL — nessun elemento `.rv` nel documento.
+
+- [ ] **Step 3: Scrivere `motion.js`**
+
+`site/assets/js/motion.js`:
+
+```js
+(() => {
+  const root = document.documentElement;
+  const ridotto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (ridotto) return;              // niente classe js: il CSS non nasconde nulla
+
+  root.classList.add('js');
+
+  const osservatore = new IntersectionObserver((voci) => {
+    for (const voce of voci) {
+      if (!voce.isIntersecting) continue;
+      voce.target.classList.add('in');
+      osservatore.unobserve(voce.target);   // una volta sola
+    }
+  }, { threshold: 0.2 });
+
+  document.querySelectorAll('.rv').forEach((el, i) => {
+    el.style.setProperty('--rv-delay', `${(i % 4) * 80}ms`);
+    osservatore.observe(el);
+  });
+})();
+```
+
+Lo stagger riparte ogni quattro elementi: in un gruppo lungo un ritardo crescente all'infinito
+lascerebbe l'ultima card ferma per secondi.
+
+- [ ] **Step 4: Agganciare CSS e script**
+
+```css
+.js .rv { opacity: 0; transform: translateY(24px); }
+.js .rv.in {
+  opacity: 1;
+  transform: none;
+  transition: opacity .6s ease var(--rv-delay, 0ms),
+              transform .6s cubic-bezier(.2,.7,.2,1) var(--rv-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .rv, .js .rv.in { opacity: 1; transform: none; transition: none; }
+}
+```
+
+Prima di `</body>` in tutte e quattro le pagine:
+
+```html
+<script src="/assets/js/motion.js" defer></script>
+```
+
+Aggiungere `class="rv"` a `.hero-text` e `.hero-media`. Le sezioni della home hanno già le loro
+classi `.rv` dal Task 5: da questo momento smettono di essere inerti.
+
+- [ ] **Step 5: Eseguire i test**
+
+Run: `npm test -- tests/motion.spec.js`
+Expected: PASS su tutti e tre i gruppi (reveal, reduced motion, senza JavaScript).
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add site tests/motion.spec.js
+git commit -m "feat: reveal allo scroll con fallback reduced-motion e no-JS"
+```
+
+---
+
+### Task 7: Sezione sticky del metodo
+
+**Files:**
+- Modify: `site/index.html`, `site/assets/css/style.css`, `site/assets/js/motion.js`, `tests/motion.spec.js`
+
+**Interfaces:**
+- Consumes: la struttura di `motion.js` dal Task 6.
+- Produces: `section#metodo` con `.metodo-track`, `.metodo-stage`, tre `.metodo-img` di cui una con classe `on`, `.metodo-cap`, `.metodo-dots`.
+
+- [ ] **Step 1: Scrivere il test che fallisce**
+
+Aggiungere a `tests/motion.spec.js`:
+
+```js
+test.describe('sezione sticky del metodo', () => {
+  test('l\'immagine cambia in base allo scroll', async ({ page }) => {
+    await page.goto('/');
+    const sezione = page.locator('#metodo');
+    const immagini = page.locator('#metodo .metodo-img');
+    await expect(immagini).toHaveCount(3);
+
+    const vaiA = async (frazione) => {
+      await sezione.evaluate((el, f) => {
+        const inizio = el.offsetTop;
+        const percorso = el.offsetHeight - window.innerHeight;
+        window.scrollTo(0, inizio + percorso * f);
+      }, frazione);
+      await page.waitForTimeout(250);
+    };
+
+    await vaiA(0.05);
+    await expect(immagini.nth(0)).toHaveClass(/\bon\b/);
+    await vaiA(0.5);
+    await expect(immagini.nth(1)).toHaveClass(/\bon\b/);
+    await expect(page.locator('#metodo .metodo-cap')).toContainText('02');
+    await vaiA(0.95);
+    await expect(immagini.nth(2)).toHaveClass(/\bon\b/);
+  });
+});
+```
+
+- [ ] **Step 2: Eseguire e verificare il fallimento**
+
+Run: `npm test -- tests/motion.spec.js -g "metodo"`
+Expected: FAIL — `#metodo` non esiste.
+
+- [ ] **Step 3: Scrivere il markup**
+
+In `index.html`, fra la sezione `#per-chi` e la sezione `#chi-sono` (l'ordine della home è quello
+dello spec §4: hero, per chi è, metodo, chi sono, percorsi, chi seguo, FAQ, contatti):
+
+```html
+<section id="metodo" class="metodo">
+  <div class="metodo-track">
+    <div class="metodo-stage">
+      <img class="metodo-img on" src="/assets/img/metodo-1.jpg" alt="Valutazione della composizione corporea" width="1200" height="900" loading="lazy" data-placeholder>
+      <img class="metodo-img" src="/assets/img/metodo-2.jpg" alt="Costruzione del piano alimentare" width="1200" height="900" loading="lazy" data-placeholder>
+      <img class="metodo-img" src="/assets/img/metodo-3.jpg" alt="Controllo dei progressi" width="1200" height="900" loading="lazy" data-placeholder>
+      <ol class="metodo-dots" aria-hidden="true"><li class="on"></li><li></li><li></li></ol>
+      <div class="metodo-cap">
+        <p class="metodo-label">Il metodo</p>
+        <h2 class="metodo-titolo">01 · Valutazione</h2>
+        <p class="metodo-testo">Composizione corporea, allenamento, orari, abitudini. Prima di scrivere qualsiasi cosa.</p>
+      </div>
+    </div>
+  </div>
+  <ol class="metodo-fallback wrap">
+    <li><h3>01 · Valutazione</h3><p>Composizione corporea, allenamento, orari, abitudini.</p></li>
+    <li><h3>02 · Piano</h3><p>Calorie e distribuzione costruite intorno ai tuoi allenamenti.</p></li>
+    <li><h3>03 · Controlli</h3><p>Aggiustamenti ogni tre o quattro settimane, con i numeri alla mano.</p></li>
+  </ol>
+</section>
+```
+
+`.metodo-fallback` è la stessa informazione in forma di elenco: è ciò che vede chi non ha
+JavaScript e ciò che legge un motore di ricerca. Con JavaScript attivo viene nascosto.
+
+- [ ] **Step 4: Scrivere il CSS**
+
+```css
+.metodo { background: var(--ink); color: #fff; }
+.metodo-track { display: none; }
+.js .metodo-track { display: block; height: 300vh; position: relative; }
+.js .metodo-fallback { display: none; }
+
+.metodo-fallback { list-style: none; padding: 3rem 0; display: grid; gap: 2rem; }
+.metodo-fallback h3 { color: var(--accent); }
+
+.metodo-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+.metodo-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .4s linear; }
+.metodo-img.on { opacity: 1; }
+
+.metodo-cap { position: absolute; inset: auto 0 0 0; padding: clamp(1.5rem, 5vw, 3.5rem); background: linear-gradient(transparent, rgba(0,0,0,.85)); }
+.metodo-label { font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.metodo-titolo { margin: .5rem 0; }
+.metodo-testo { color: rgba(255,255,255,.85); }
+
+.metodo-dots { position: absolute; right: 1.25rem; top: 50%; translate: 0 -50%; list-style: none; padding: 0; display: grid; gap: .5rem; }
+.metodo-dots li { width: 6px; height: 6px; border-radius: 99px; background: rgba(255,255,255,.35); transition: height .3s; }
+.metodo-dots li.on { background: #fff; height: 20px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js .metodo-track { display: none; }
+  .js .metodo-fallback { display: grid; }
+}
+```
+
+Con `prefers-reduced-motion` la sezione sticky sparisce del tutto e resta l'elenco: è la soluzione
+onesta, un'animazione "attenuata" alta tre schermate resta comunque disorientante.
+
+- [ ] **Step 5: Aggiungere lo scrub a `motion.js`**
+
+Prima della chiusura della funzione anonima:
+
+```js
+  const sezione = document.querySelector('#metodo');
+  if (sezione) {
+    const track = sezione.querySelector('.metodo-track');
+    const immagini = [...sezione.querySelectorAll('.metodo-img')];
+    const punti = [...sezione.querySelectorAll('.metodo-dots li')];
+    const titolo = sezione.querySelector('.metodo-titolo');
+    const testo = sezione.querySelector('.metodo-testo');
+    const passi = [
+      ['01 · Valutazione', 'Composizione corporea, allenamento, orari, abitudini. Prima di scrivere qualsiasi cosa.'],
+      ['02 · Piano', 'Calorie e distribuzione costruite intorno ai tuoi allenamenti.'],
+      ['03 · Controlli', 'Aggiustamenti ogni tre o quattro settimane, con i numeri alla mano.'],
+    ];
+
+    let attivo = -1;
+    let inCoda = false;
+
+    const aggiorna = () => {
+      inCoda = false;
+      const percorso = track.offsetHeight - window.innerHeight;
+      const fatto = (window.scrollY - track.offsetTop) / percorso;
+      const i = fatto < 0.34 ? 0 : fatto < 0.68 ? 1 : 2;
+      if (i === attivo) return;
+      attivo = i;
+      immagini.forEach((im, k) => im.classList.toggle('on', k === i));
+      punti.forEach((p, k) => p.classList.toggle('on', k === i));
+      titolo.textContent = passi[i][0];
+      testo.textContent = passi[i][1];
+    };
+
+    window.addEventListener('scroll', () => {
+      if (inCoda) return;
+      inCoda = true;
+      requestAnimationFrame(aggiorna);
+    }, { passive: true });
+    aggiorna();
+  }
+```
+
+`inCoda` accorpa gli eventi di scroll: senza, su un trackpad si eseguono decine di aggiornamenti per
+fotogramma.
+
+- [ ] **Step 6: Eseguire tutti i test di motion**
+
+Run: `npm test -- tests/motion.spec.js`
+Expected: PASS, compresi i test del reveal scritti nel Task 6 (nessuna regressione).
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add site tests/motion.spec.js
+git commit -m "feat: sezione sticky del metodo con fallback a elenco"
 ```
 
 ---
@@ -1198,15 +1198,18 @@ git commit -m "feat: pagine percorsi e chi sono"
 import { test, expect } from '@playwright/test';
 import { PAGES } from './pages.js';
 
-test('censimento dei contenuti segnaposto', async ({ page }) => {
-  const trovati = [];
+test('nessun contenuto segnaposto resta prima della pubblicazione', async ({ page }) => {
+  test.skip(!process.env.PUBLISH, 'controllo di pubblicazione: eseguire con PUBLISH=1 npm test');
+
+  const rimasti = [];
   for (const path of PAGES) {
     await page.goto(path);
-    const n = await page.locator('[data-placeholder]').count();
-    trovati.push(`${path}: ${n}`);
+    for (const el of await page.locator('[data-placeholder]').all()) {
+      const testo = (await el.innerText()).replace(/\s+/g, ' ').trim().slice(0, 60);
+      rimasti.push(`${path} → ${testo}`);
+    }
   }
-  console.log('Segnaposto ancora da sostituire →', trovati.join('  |  '));
-  expect(trovati.length).toBe(PAGES.length);
+  expect(rimasti, 'dati inventati ancora presenti, non pubblicare').toEqual([]);
 });
 
 test('i dati strutturati sono validi e coerenti col footer', async ({ page }) => {
@@ -1220,9 +1223,9 @@ test('i dati strutturati sono validi e coerenti col footer', async ({ page }) =>
 });
 ```
 
-Questo test non fallisce mai per numero di segnaposto: stampa. Serve a rendere impossibile andare
-online senza sapere quanti dati inventati restano. Il controllo che blocca la pubblicazione sta nel
-README, Task 11.
+Con `npm test` normale il controllo si salta: durante lo sviluppo i segnaposto ci devono essere. Con
+`PUBLISH=1 npm test` diventa rosso ed elenca esattamente cosa resta da sostituire, pagina per pagina.
+È il freno che impedisce di pubblicare con la partita IVA inventata.
 
 - [ ] **Step 2: Eseguire e verificare il fallimento**
 
@@ -1509,7 +1512,7 @@ giorno incolla uno script di Google, il browser lo blocca e il problema si vede 
 - Comandi: `npm install`, `npx playwright install chromium`, `npm run dev`, `npm test`, `npm run validate`, `npm run images`, `npm run fonts`.
 - La regola dei domini terzi, con la frase: *nessuna risorsa esterna, altrimenti servono informativa e banner cookie*.
 - **Checklist prima della pubblicazione:**
-  1. Sostituire tutti gli elementi con `data-placeholder` e rimuovere l'attributo. `npm test` stampa quanti ne restano per pagina.
+  1. Sostituire tutti gli elementi con `data-placeholder` e rimuovere l'attributo. `PUBLISH=1 npm test` fallisce finché ne resta anche uno, ed elenca quali.
   2. Verificare partita IVA, numero di iscrizione all'albo e qualifica esatta con il cliente.
   3. Sostituire le immagini temporanee con le foto reali e rigenerare con `npm run images`.
   4. Rileggere i testi cercando promesse di risultato: sono vietate dalla Legge 145/2018.
