@@ -139,3 +139,7 @@ p { max-width: 62ch; }
 .percorso { border-top: 1px solid var(--line); padding: 2rem 0; }
 .percorso p { color: var(--ink-soft); margin-top: .5rem; }
 .percorso strong { color: var(--ink); }
+
+.footer-nav { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; }
+.testo p { margin-top: 1rem; }
+.testo h2 { margin-top: 2rem; font-size: 1.3rem; }
