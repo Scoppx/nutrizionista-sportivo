@@ -94,3 +94,15 @@ p { max-width: 62ch; }
   .cards { grid-template-columns: repeat(3, 1fr); }
   .due-colonne { grid-template-columns: .9fr 1.1fr; }
 }
+
+.js .rv { opacity: 0; transform: translateY(24px); }
+.js .rv.in {
+  opacity: 1;
+  transform: none;
+  transition: opacity .6s ease var(--rv-delay, 0ms),
+              transform .6s cubic-bezier(.2,.7,.2,1) var(--rv-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .rv, .js .rv.in { opacity: 1; transform: none; transition: none; }
+}
