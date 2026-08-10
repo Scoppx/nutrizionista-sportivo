@@ -138,7 +138,7 @@ test('la home si carica ed è dichiarata in italiano', async ({ page }) => {
     "@fontsource-variable/inter": "^5.1.0",
     "@playwright/test": "^1.50.0",
     "html-validate": "^9.0.0",
-    "sharp": "^0.33.5"
+    "sharp": "^0.35.0"
   }
 }
 ```
@@ -179,7 +179,7 @@ playwright-report/
 
 - [ ] **Step 3: Installare e verificare che il test fallisca**
 
-Run: `npm install && npx playwright install chromium && npm test`
+Run: `npm install && npx playwright install chromium webkit && npm test`
 Expected: FAIL — il server risponde con l'elenco della cartella, `site/index.html` non esiste.
 
 - [ ] **Step 4: Scrivere il minimo che fa passare il test**
@@ -240,7 +240,7 @@ Expected: PASS su entrambi i progetti (mobile, desktop).
 - [ ] **Step 6: Commit**
 
 ```bash
-git add package.json playwright.config.js .html-validate.json .gitignore site tests
+git add package.json package-lock.json playwright.config.js .html-validate.json .gitignore site tests
 git commit -m "chore: impianto progetto, server di test e smoke test"
 ```
 
@@ -1509,7 +1509,7 @@ giorno incolla uno script di Google, il browser lo blocca e il problema si vede 
 `README.md` deve contenere:
 
 - Cosa è il sito e cosa non fa (niente prenotazioni, niente area clienti).
-- Comandi: `npm install`, `npx playwright install chromium`, `npm run dev`, `npm test`, `npm run validate`, `npm run images`, `npm run fonts`.
+- Comandi: `npm install`, `npx playwright install chromium webkit`, `npm run dev`, `npm test`, `npm run validate`, `npm run images`, `npm run fonts`.
 - La regola dei domini terzi, con la frase: *nessuna risorsa esterna, altrimenti servono informativa e banner cookie*.
 - **Checklist prima della pubblicazione:**
   1. Sostituire tutti gli elementi con `data-placeholder` e rimuovere l'attributo. `PUBLISH=1 npm test` fallisce finché ne resta anche uno, ed elenca quali.
