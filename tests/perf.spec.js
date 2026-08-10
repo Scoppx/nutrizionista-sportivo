@@ -1,4 +1,12 @@
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { test, expect } from '@playwright/test';
+
+test('motion.js resta sotto il budget di 3 KB non compresso', () => {
+  const percorso = fileURLToPath(new URL('../site/assets/js/motion.js', import.meta.url));
+  const byte = readFileSync(percorso).length;
+  expect(byte, `motion.js pesa ${byte} byte, sopra il budget di 3072`).toBeLessThanOrEqual(3072);
+});
 
 test('la home resta sotto gli 800 KB', async ({ page }) => {
   await page.goto('/', { waitUntil: 'networkidle' });

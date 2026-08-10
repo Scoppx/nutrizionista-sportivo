@@ -14,12 +14,8 @@
 
   const elenco = [...document.querySelectorAll('.rv')];
 
-  // Misurare la posizione ORA, prima di aggiungere la classe 'js': senza di
-  // essa '.rv' non ha ancora la regola opacity:0, quindi questa lettura
-  // (che forza layout) non "fissa" nessuno stato intermedio da animare.
-  // Misurare dopo aver reso invisibile l'elemento costringerebbe il
-  // browser a registrare opacity:0 come stile osservato, e la classe 'in'
-  // aggiunta subito dopo farebbe comunque partire una transizione vera.
+  // Misurata PRIMA di aggiungere 'js' (quando '.rv' non ha ancora opacity:0),
+  // altrimenti la lettura fisserebbe quello stato e farebbe partire una transizione vera.
   const giaVisibili = new Set(
     elenco.filter((el) => {
       const rect = el.getBoundingClientRect();
@@ -32,12 +28,8 @@
   elenco.forEach((el, i) => {
     el.style.setProperty('--rv-delay', `${(i % 4) * 80}ms`);
     if (giaVisibili.has(el)) {
-      // già dentro il viewport al caricamento: niente da "rivelare". La classe
-      // arriva nello stesso giro di sincrono di 'js', senza letture di layout
-      // in mezzo, cosi' il motore la applica prima del primo paint invece di
-      // animarla — altrimenti contenuto già visibile sfarfallerebbe da
-      // invisibile a visibile, e per una finestra di transizione il testo
-      // avrebbe contrasto sotto soglia.
+      // già in vista: 'in' nello stesso giro sincrono di 'js', senza letture di
+      // layout in mezzo, così non anima (niente flash, niente calo di contrasto).
       el.classList.add('in');
     } else {
       osservatore.observe(el);
