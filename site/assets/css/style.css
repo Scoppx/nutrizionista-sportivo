@@ -1,0 +1,21 @@
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+html { -webkit-text-size-adjust: 100%; }
+img, picture, video { display: block; max-width: 100%; }
+
+:root {
+  --bg: #fbfbfa;
+  --bg-alt: #f2f2f0;
+  --ink: #16181a;
+  --ink-soft: #6a6f73;
+  --accent: #e2542a;
+  --line: #e7e7e4;
+  --wrap: 1080px;
+  --gap: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 17px/1.6 system-ui, -apple-system, sans-serif;
+}
