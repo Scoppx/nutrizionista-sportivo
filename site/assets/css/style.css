@@ -19,3 +19,27 @@ body {
   color: var(--ink);
   font: 400 17px/1.6 system-ui, -apple-system, sans-serif;
 }
+
+.wrap { width: min(100% - 2.5rem, var(--wrap)); margin-inline: auto; }
+
+.skip { position: absolute; left: -9999px; }
+.skip:focus { left: 1rem; top: 1rem; background: var(--ink); color: #fff; padding: .6rem 1rem; z-index: 99; }
+
+.site-header { border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); z-index: 50; }
+.site-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .9rem 0; }
+.logo { font-weight: 700; letter-spacing: .04em; text-decoration: none; color: var(--ink); }
+.site-header nav { display: flex; align-items: center; gap: 1.25rem; }
+.site-header nav a { color: var(--ink-soft); text-decoration: none; font-size: .95rem; }
+.site-header nav a:hover, .site-header nav a[aria-current="page"] { color: var(--ink); }
+
+.btn { display: inline-block; padding: .7rem 1.2rem; border-radius: 99px; font-weight: 700; text-decoration: none; }
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-ink { background: var(--ink); color: #fff; }
+
+.site-footer { border-top: 1px solid var(--line); margin-top: 4rem; padding: 2.5rem 0; color: var(--ink-soft); font-size: .9rem; }
+.site-footer p + p { margin-top: .35rem; }
+.site-footer a { color: var(--ink); }
+
+@media (max-width: 900px) {
+  .site-header nav a:not(.btn) { display: none; }
+}
