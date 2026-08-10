@@ -29,7 +29,7 @@ Valgono per ogni task. Ogni task li eredita implicitamente.
 - **Zero dipendenze a runtime.** Nessuna libreria JavaScript inclusa nelle pagine. Budget: `motion.js` sotto 3 KB non compresso.
 - **Zero richieste a domini terzi.** Nessun Google Fonts remoto, nessun iframe di Google Maps, nessun analytics, nessun pixel, nessun iframe di prenotazione. Ogni risorsa arriva dallo stesso dominio. Questo è ciò che tiene il sito senza banner cookie: è un vincolo legale, non un'ottimizzazione.
 - **Colori** (custom properties, valori esatti): `--bg: #fbfbfa`, `--bg-alt: #f2f2f0`, `--ink: #16181a`, `--ink-soft: #6a6f73`, `--accent: #e2542a`, `--line: #e7e7e4`.
-- **L'arancio `--accent` compare solo su bottoni di contatto, numerazione del metodo e sulla singola parola in evidenza nell'`h1` della hero** (era così nel mockup approvato). Mai su testo corrente, bordi decorativi o sfondi ampi.
+- **L'arancio `--accent` compare solo su bottoni di contatto, numerazione del metodo, sulla singola parola in evidenza nell'`h1` della hero** (era così nel mockup approvato) **e sull'anello di focus da tastiera**. Il focus è interfaccia funzionale, non decorazione: deve essere il colore più visibile che abbiamo. Mai su testo corrente, bordi decorativi o sfondi ampi.
 - **Tipografia:** una sola famiglia (Inter), self-hosted da `site/assets/fonts/`, pesi 400 e 700. Testo corrente 17px, `line-height` 1.6. Titoli con `letter-spacing` negativo.
 - **Breakpoint unico a 900px**, mobile first.
 - **Motion:** reveal con soglia `IntersectionObserver` 0.2, transizione 600ms, `translateY(24px)`, stagger 80ms, attivazione una sola volta. Sotto `prefers-reduced-motion: reduce` tutto è visibile subito, senza transform né transizioni.
