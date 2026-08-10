@@ -608,7 +608,9 @@ test('la home contiene tutte le sezioni previste', async ({ page }) => {
 
 test('nessuna testimonianza e nessuna promessa di risultato', async ({ page }) => {
   await page.goto('/');
-  const testo = (await page.locator('body').innerText()).toLowerCase();
+  // textContent, non innerText: le risposte delle FAQ stanno dentro <details>
+  // chiusi e innerText non le vede, quindi una frase vietata passerebbe
+  const testo = ((await page.locator('body').textContent()) || '').toLowerCase();
   for (const vietato of ['testimonianz', 'garantit', 'prima e dopo', 'in soli', 'risultati garantiti']) {
     expect(testo, `il testo contiene "${vietato}": vietato dalla Legge 145/2018`).not.toContain(vietato);
   }
