@@ -10,6 +10,25 @@ test('motion.js resta sotto il budget di 3 KB non compresso', () => {
 
 test('la home resta sotto gli 800 KB', async ({ page }) => {
   await page.goto('/', { waitUntil: 'networkidle' });
+  // A networkidle le immagini lazy sotto la finestra di prefetch del browser non
+  // sono ancora state richieste: senza scorrere fino in fondo il test misura solo
+  // ciò che è già a schermo e sottostima il peso reale (oggi il divario è ~3 KB
+  // sui placeholder, ma con le foto definitive da 1800px potrebbe nascondere
+  // megabyte interi dietro un risultato verde).
+  await page.evaluate(async () => {
+    await new Promise((resolve) => {
+      const passo = () => {
+        window.scrollBy(0, window.innerHeight);
+        if (window.scrollY + window.innerHeight < document.body.scrollHeight) {
+          requestAnimationFrame(passo);
+        } else {
+          resolve();
+        }
+      };
+      passo();
+    });
+  });
+  await page.waitForLoadState('networkidle');
   const byte = await page.evaluate(() => {
     // getEntriesByType('resource') esclude per specifica il documento HTML
     // principale, che vive nell'entry 'navigation': senza sommarlo il test
@@ -19,7 +38,7 @@ test('la home resta sotto gli 800 KB', async ({ page }) => {
     return risorse + documento;
   });
   const kb = Math.round(byte / 1024);
-  console.log(`peso della home: ${kb} KB`);
+  console.log(`peso della home (dopo scroll completo): ${kb} KB`);
   expect(kb).toBeLessThan(800);
 });
 
