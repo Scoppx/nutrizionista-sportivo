@@ -83,8 +83,11 @@ banner cookie da introdurre. Non è una scelta stilistica.
 | Studio | Via Esempio 1, Milano |
 | Città (SEO) | Milano |
 
-Tutti questi valori compaiono su elementi marcati `data-placeholder`; il
-punto 1 della checklist sopra è il modo per non dimenticarne nessuno.
+Tutti questi valori compaiono su elementi marcati `data-placeholder` — non
+per convenzione manuale, ma perché `tests/placeholders.spec.js` verifica ogni
+occorrenza nota di questi valori e fallisce (sempre, non solo sotto
+`PUBLISH=1`) se ne trova una fuori da un elemento marcato. Il punto 1 della
+checklist sopra è il modo per non dimenticarne nessuno.
 
 ## Deploy
 
