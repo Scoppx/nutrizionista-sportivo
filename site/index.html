@@ -54,9 +54,11 @@
         </div>
         <div class="hero-media rv">
           <picture>
-            <source type="image/webp" srcset="/assets/img/hero.webp 900w, /assets/img/hero@2x.webp 1800w" sizes="(min-width: 900px) 45vw, 100vw">
-            <img src="/assets/img/hero.jpg" srcset="/assets/img/hero.jpg 900w, /assets/img/hero@2x.jpg 1800w" sizes="(min-width: 900px) 45vw, 100vw"
-                 alt="Ritratto del nutrizionista nel suo studio" width="900" height="1100" fetchpriority="high" data-placeholder>
+            <!-- Foto reale a 752px: piu' stretta della soglia @2x, quindi una sola
+                 candidata. Con un originale da 1800px torna il srcset a due voci. -->
+            <source type="image/webp" srcset="/assets/img/hero.webp">
+            <img src="/assets/img/hero.jpg"
+                 alt="Ritratto del nutrizionista nel suo studio" width="752" height="960" fetchpriority="high" data-placeholder>
           </picture>
         </div>
       </div>

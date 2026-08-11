@@ -30,10 +30,27 @@ try {
 const file = elenco.filter((f) => /\.(jpe?g|png)$/i.test(f));
 if (file.length === 0) console.warn(`nessuna immagine in ${IN}`);
 
+const BASE = LARGHEZZE[''];
+
 for (const f of file) {
   const nome = path.parse(f).name;
+  const sorgente = path.join(IN, f);
+  const { width: larghezzaSorgente } = await sharp(sorgente).metadata();
+
   for (const [suffisso, larghezza] of Object.entries(LARGHEZZE)) {
-    const base = sharp(path.join(IN, f)).resize({ width: larghezza, withoutEnlargement: true });
+    // sharp non ingrandisce mai: da una sorgente piu' stretta del target uscirebbe
+    // un file identico alla variante base, e il markup direbbe al browser che vale
+    // il doppio dei pixel. Meglio non produrla e dirlo forte.
+    if (larghezza !== BASE && larghezzaSorgente < larghezza) {
+      console.warn(
+        `${nome}${suffisso}: SALTATA — la sorgente e' larga ${larghezzaSorgente}px, ` +
+        `servono ${larghezza}px. Togli la candidata ${larghezza}w dal srcset di ${nome}, ` +
+        'oppure fornisci una foto piu' + "'" + ' grande.'
+      );
+      continue;
+    }
+
+    const base = sharp(sorgente).resize({ width: larghezza, withoutEnlargement: true });
     await base.clone().webp({ quality: 78 }).toFile(path.join(OUT, `${nome}${suffisso}.webp`));
     await base.clone().jpeg({ quality: 82, mozjpeg: true }).toFile(path.join(OUT, `${nome}${suffisso}.jpg`));
     console.log(`${nome}${suffisso}: ${larghezza}px`);
