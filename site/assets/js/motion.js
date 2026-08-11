@@ -25,8 +25,9 @@
 
   root.classList.add('js');
 
-  elenco.forEach((el, i) => {
-    el.style.setProperty('--rv-delay', `${(i % 4) * 80}ms`);
+  elenco.forEach((el) => {
+    const fratelli = [...el.parentElement.children].filter((n) => n.classList.contains('rv'));
+    el.style.setProperty('--rv-delay', `${(fratelli.indexOf(el) % 4) * 80}ms`);
     if (giaVisibili.has(el)) {
       // già in vista: 'in' nello stesso giro sincrono di 'js', senza letture di
       // layout in mezzo, così non anima (niente flash, niente calo di contrasto).

@@ -22,6 +22,28 @@ test.describe('reveal', () => {
     await page.waitForTimeout(300);
     await expect(target).toHaveClass(/\bin\b/);
   });
+
+  test('lo stagger riparte da zero per ogni gruppo di fratelli .rv, non prosegue globale', async ({ page }) => {
+    await page.goto('/');
+    const ritardo = (loc) => loc.evaluate((el) => getComputedStyle(el).getPropertyValue('--rv-delay').trim());
+
+    // "Per chi è": tre card, tutte fratelli diretti dentro .cards. Con un indice
+    // globale (bug) la prima card erediterebbe l'indice successivo all'h2.rv che
+    // la precede in pagina e non partirebbe da 0ms.
+    const card = page.locator('#per-chi .card.rv');
+    await expect(card).toHaveCount(3);
+    expect(await ritardo(card.nth(0))).toBe('0ms');
+    expect(await ritardo(card.nth(1))).toBe('80ms');
+    expect(await ritardo(card.nth(2))).toBe('160ms');
+
+    // FAQ: cinque righe, stesso genitore .faq. Il quinto elemento (indice 4) deve
+    // ripartire da 0ms nel proprio gruppo (4 % 4 == 0), non continuare la sequenza
+    // globale di pagina.
+    const faq = page.locator('#faq .faq .rv');
+    await expect(faq).toHaveCount(5);
+    expect(await ritardo(faq.nth(0))).toBe('0ms');
+    expect(await ritardo(faq.nth(4))).toBe('0ms');
+  });
 });
 
 test.describe('accessibilità del movimento', () => {
