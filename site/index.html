@@ -6,6 +6,7 @@
   <title data-placeholder>Dott. Marco Rossi — Biologo nutrizionista a Milano</title>
   <meta name="description" data-placeholder content="Nutrizione sportiva e alimentazione per la salute a Milano. Percorsi su misura per chi si allena e per chi vuole stare bene.">
   <link rel="preload" href="/assets/fonts/inter-variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/assets/css/style.css">
   <script type="application/ld+json" data-placeholder>
 {
@@ -27,10 +28,12 @@
     <div class="wrap">
       <a class="logo" href="/" data-placeholder>Dott. Marco Rossi</a>
       <nav aria-label="Principale">
-        <a href="/chi-sono.html">Chi sono</a>
-        <a href="/percorsi.html">Percorsi</a>
-        <a href="/#contatti">Contatti</a>
-        <a class="btn btn-accent" href="https://wa.me/393330000000" data-placeholder>Scrivimi</a>
+        <div class="nav-links">
+          <a href="/chi-sono.html">Chi sono</a>
+          <a href="/percorsi.html">Percorsi</a>
+          <a href="/#contatti">Contatti</a>
+        </div>
+        <a class="btn btn-accent" href="https://wa.me/393330000000" target="_blank" rel="noopener" data-placeholder>Scrivimi</a>
       </nav>
     </div>
   </header>
@@ -97,17 +100,20 @@
           </picture>
           <ol class="metodo-dots" aria-hidden="true"><li class="on"></li><li></li><li></li></ol>
           <div class="metodo-cap">
-            <p class="metodo-label">Il metodo</p>
-            <h2 class="metodo-titolo">01 · Valutazione</h2>
+            <h2 class="metodo-label">Il metodo</h2>
+            <h3 class="metodo-titolo">01 · Valutazione</h3>
             <p class="metodo-testo">Composizione corporea, allenamento, orari, abitudini. Prima di scrivere qualsiasi cosa.</p>
           </div>
         </div>
       </div>
-      <ol class="metodo-fallback wrap">
-        <li><h3>01 · Valutazione</h3><p>Composizione corporea, allenamento, orari, abitudini. Prima di scrivere qualsiasi cosa.</p></li>
-        <li><h3>02 · Piano</h3><p>Calorie e distribuzione costruite intorno ai tuoi allenamenti.</p></li>
-        <li><h3>03 · Controlli</h3><p>Aggiustamenti ogni tre o quattro settimane, con i numeri alla mano.</p></li>
-      </ol>
+      <div class="metodo-fallback-blocco wrap">
+        <h2 class="metodo-label">Il metodo</h2>
+        <ol class="metodo-fallback">
+          <li><h3>01 · Valutazione</h3><p>Composizione corporea, allenamento, orari, abitudini. Prima di scrivere qualsiasi cosa.</p></li>
+          <li><h3>02 · Piano</h3><p>Calorie e distribuzione costruite intorno ai tuoi allenamenti.</p></li>
+          <li><h3>03 · Controlli</h3><p>Aggiustamenti ogni tre o quattro settimane, con i numeri alla mano.</p></li>
+        </ol>
+      </div>
     </section>
 
     <section id="chi-sono" class="sezione wrap due-colonne">

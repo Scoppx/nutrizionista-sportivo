@@ -8,11 +8,39 @@ test('la home si carica ed è dichiarata in italiano', async ({ page }) => {
   await expect(page.locator('h1')).toHaveCount(1);
 });
 
+for (const path of PAGES) {
+  test(`favicon dichiarato e raggiungibile su ${path}`, async ({ page, request }) => {
+    await page.goto(path);
+    await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', '/favicon.svg');
+    const risposta = await request.get('/favicon.svg');
+    expect(risposta.status()).toBe(200);
+  });
+}
+
 test('la home contiene tutte le sezioni previste', async ({ page }) => {
   await page.goto('/');
   for (const id of ['per-chi', 'chi-sono', 'percorsi', 'chi-seguo', 'faq', 'contatti']) {
     await expect(page.locator(`#${id}`), `manca la sezione #${id}`).toHaveCount(1);
   }
+});
+
+test('sotto i 900px i link del nav restano raggiungibili (vanno a capo, non spariscono)', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto('/percorsi.html');
+  for (const testo of ['Chi sono', 'Percorsi', 'Contatti']) {
+    await expect(page.locator('.site-header .nav-links a', { hasText: testo })).toBeVisible();
+  }
+  await expect(page.locator('.site-header .btn')).toBeVisible();
+  // l'header sticky non deve mangiarsi una quota irragionevole di un viewport piccolo
+  const altezza = await page.locator('header.site-header').evaluate((el) => el.getBoundingClientRect().height);
+  expect(altezza, `header alto ${altezza}px su un viewport di 667px`).toBeLessThan(667 * 0.25);
+});
+
+test('/#contatti atterra sotto l\'header sticky, non nascosto dietro', async ({ page }) => {
+  await page.goto('/#contatti');
+  const headerBottom = await page.locator('header.site-header').evaluate((el) => el.getBoundingClientRect().bottom);
+  const titoloTop = await page.locator('#contatti h2').evaluate((el) => el.getBoundingClientRect().top);
+  expect(titoloTop, 'il titolo "Parliamone" finisce sotto l\'header sticky').toBeGreaterThanOrEqual(headerBottom);
 });
 
 for (const path of PAGES) {

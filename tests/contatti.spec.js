@@ -22,3 +22,20 @@ for (const path of PAGES) {
     }
   });
 }
+
+// Il controllo sopra parte da a[target="_blank"]: un link che non ha affatto
+// target="_blank" (come il bottone WhatsApp nell'header, prima di questo fix)
+// non entra mai in quel ciclo e la sua mancanza passa inosservata. Qui il
+// punto di partenza è invece "ogni link verso WhatsApp", indipendentemente
+// da cosa ha già impostato.
+for (const path of PAGES) {
+  test(`ogni link WhatsApp si apre in una nuova scheda senza aprire falle su ${path}`, async ({ page }) => {
+    await page.goto(path);
+    const link = page.locator('a[href^="https://wa.me/"]');
+    expect(await link.count(), `nessun link WhatsApp su ${path}`).toBeGreaterThan(0);
+    for (const a of await link.all()) {
+      await expect(a).toHaveAttribute('target', '_blank');
+      await expect(a).toHaveAttribute('rel', /noopener/);
+    }
+  });
+}

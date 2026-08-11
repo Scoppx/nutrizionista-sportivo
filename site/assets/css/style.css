@@ -40,12 +40,16 @@ p { max-width: 62ch; }
 .skip:focus { left: 1rem; top: 1rem; background: var(--ink); color: #fff; padding: .6rem 1rem; z-index: 99; }
 
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
-.metodo :focus-visible { outline-color: #fff; }
 
 .site-header { border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); z-index: 50; }
-.site-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .9rem 0; }
+.site-header .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; padding: .7rem 0; }
 .logo { font-weight: 700; letter-spacing: .04em; text-decoration: none; color: var(--ink); }
 .site-header nav { display: flex; align-items: center; gap: 1.25rem; }
+/* .nav-links esiste solo per poter staccare i tre link di testo dal bottone
+   Scrivimi sotto i 900px (vedi media query sotto): sopra i 900px resta
+   trasparente al layout, cosi' il nav si comporta come un'unica riga flex
+   identica a prima. */
+.nav-links { display: contents; }
 .site-header nav a:not(.btn) { color: var(--ink-soft); text-decoration: none; font-size: .95rem; }
 .site-header nav a:not(.btn):hover, .site-header nav a:not(.btn)[aria-current="page"] { color: var(--ink); }
 
@@ -59,8 +63,24 @@ p { max-width: 62ch; }
 .site-footer p + p { margin-top: .35rem; }
 .site-footer a { color: var(--ink); }
 
-@media (max-width: 900px) {
-  .site-header nav a:not(.btn) { display: none; }
+/* 899.98px, non 900px: a esattamente 900px questa regola e le min-width:900px
+   sotto (hero-grid, cards, due-colonne) matcherebbero entrambe, lasciando il
+   nav mobile nascosto/impilato mentre il resto del layout e' gia' desktop. */
+@media (max-width: 899.98px) {
+  /* niente hamburger, niente JS: il nav si "smonta" nel flusso flex di .wrap
+     (vedi .nav-links sopra) cosi' i tre link di testo possono formare una
+     seconda riga a piena larghezza sotto logo e bottone, invece di sparire. */
+  .site-header nav { display: contents; }
+  .site-header .btn { order: 1; }
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1.1rem;
+    order: 2;
+    flex: 1 0 100%;
+    padding-top: .5rem;
+    border-top: 1px solid var(--line);
+  }
 }
 
 .hero { padding: clamp(2.5rem, 8vw, 5.5rem) 0; }
@@ -77,6 +97,16 @@ p { max-width: 62ch; }
 
 .sezione { padding: clamp(3rem, 9vw, 6rem) 0; }
 .sezione > h2 { margin-bottom: 2rem; }
+
+/* senza questo, /#contatti (link del footer e del nav) atterra con l'intestazione
+   sotto l'header sticky. Due valori perche' sotto i 900px l'header e' alto il
+   doppio (nav su due righe, vedi sopra): 5.5rem basterebbero sul desktop ma
+   lascerebbero il titolo mezzo coperto su un telefono. */
+section[id] { scroll-margin-top: 8rem; }
+
+@media (min-width: 900px) {
+  section[id] { scroll-margin-top: 5.5rem; }
+}
 
 .cards { display: grid; gap: 1.25rem; }
 .card { background: var(--bg-alt); border: 1px solid var(--line); border-radius: 14px; padding: 1.5rem; }
@@ -115,9 +145,11 @@ p { max-width: 62ch; }
 .metodo { background: var(--ink); color: #fff; }
 .metodo-track { display: none; }
 .js .metodo-track { display: block; height: 300vh; position: relative; }
-.js .metodo-fallback { display: none; }
+.js .metodo-fallback-blocco { display: none; }
 
-.metodo-fallback { list-style: none; padding: 3rem 0; display: grid; gap: 2rem; }
+.metodo-fallback-blocco { padding: 3rem 0; }
+.metodo-fallback-blocco .metodo-label { margin-bottom: 1.25rem; }
+.metodo-fallback { list-style: none; display: grid; gap: 2rem; }
 .metodo-fallback h3 { color: var(--accent); }
 
 .metodo-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
@@ -125,8 +157,10 @@ p { max-width: 62ch; }
 .metodo-img.on { opacity: 1; }
 
 .metodo-cap { position: absolute; inset: auto 0 0 0; padding: clamp(1.5rem, 5vw, 3.5rem); background: linear-gradient(transparent, rgba(0,0,0,.85)); }
-.metodo-label { font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
-.metodo-titolo { margin: .5rem 0; }
+/* .metodo-label ("Il metodo") resta bianco/neutro in entrambe le rese: l'accento
+   è sul numero del passo (.metodo-titolo qui, .metodo-fallback h3 sopra), non sull'eyebrow. */
+.metodo-label { font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 400; }
+.metodo-titolo { margin: .5rem 0; font-size: clamp(1.8rem, 4vw, 2.6rem); color: var(--accent); }
 .metodo-testo { color: rgba(255,255,255,.85); }
 
 .metodo-dots { position: absolute; right: 1.25rem; top: 50%; translate: 0 -50%; list-style: none; padding: 0; display: grid; gap: .5rem; }
@@ -138,7 +172,7 @@ p { max-width: 62ch; }
    gia' aperta (con .js gia' impostata) senza bisogno di un reload. */
 @media (prefers-reduced-motion: reduce) {
   .js .metodo-track { display: none; }
-  .js .metodo-fallback { display: grid; }
+  .js .metodo-fallback-blocco { display: block; }
 }
 
 .percorso { border-top: 1px solid var(--line); padding: 2rem 0; }
