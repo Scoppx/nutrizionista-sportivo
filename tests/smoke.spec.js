@@ -43,11 +43,23 @@ test('/#contatti atterra sotto l\'header sticky, non nascosto dietro', async ({ 
   expect(titoloTop, 'il titolo "Parliamone" finisce sotto l\'header sticky').toBeGreaterThanOrEqual(headerBottom);
 });
 
+// "risultati garantiti" non compare come voce a sé: è già intercettata da "garantit".
+const PAROLE_VIETATE = [
+  'testimonianz', 'garantit', 'prima e dopo', 'in soli',
+  'sconto', 'offerta', 'promozione', 'gratis', 'omaggio', 'il miglior',
+];
+
 for (const path of PAGES) {
   test(`nessuna testimonianza e nessuna promessa di risultato su ${path}`, async ({ page }) => {
     await page.goto(path);
-    const testo = (await page.locator('body').textContent()).toLowerCase();
-    for (const vietato of ['testimonianz', 'garantit', 'prima e dopo', 'in soli', 'risultati garantiti']) {
+    // <title> e <meta name="description"> non fanno parte di body.textContent():
+    // un claim vietato lì dentro (frequente in title/meta pensati per il click,
+    // non per il corpo del testo) passerebbe inosservato senza includerli qui.
+    const titolo = (await page.title()).toLowerCase();
+    const descrizione = ((await page.locator('meta[name="description"]').getAttribute('content')) || '').toLowerCase();
+    const corpo = (await page.locator('body').textContent()).toLowerCase();
+    const testo = `${titolo}\n${descrizione}\n${corpo}`;
+    for (const vietato of PAROLE_VIETATE) {
       expect(testo, `il testo contiene "${vietato}": vietato dalla Legge 145/2018`).not.toContain(vietato);
     }
   });

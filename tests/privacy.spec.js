@@ -16,7 +16,10 @@ test.describe('conformità di base', () => {
     test(`footer legale presente su ${path}`, async ({ page }) => {
       await page.goto(path);
       const footer = page.locator('footer.site-footer');
-      await expect(footer).toContainText(/P\.?\s?IVA/i);
+      // servono le cifre, non solo l'etichetta: un footer con "P. IVA" senza numero
+      // (es. dopo una sostituzione manuale finita male) passerebbe comunque un
+      // controllo che si fermasse alla sola sigla.
+      await expect(footer).toContainText(/P\.?\s?IVA\s*\d{11}/i);
       await expect(footer).toContainText(/ONB n\./i);
       await expect(footer.locator('a[href$="privacy.html"]')).toHaveCount(1);
     });
