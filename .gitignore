@@ -1,0 +1,7 @@
+.superpowers/
+.DS_Store
+node_modules/
+test-results/
+playwright-report/
+assets-sorgenti/
+.preview/
